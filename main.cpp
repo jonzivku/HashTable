@@ -45,10 +45,14 @@ int main(){
       
       ifstream input(filename.c_str(), std::ios::in);
       if(!input.fail()){
-	//run load function to fill hash table
-	loadTable(input);
-	//undefined function
-
+	while(input){
+	  input >> key;
+	  getline(input, data, ' ');
+	  getline(input, data);
+	  temp = new Record(key, data);
+	  A->insert(temp);
+	  delete temp; temp = NULL;
+	  }
 	input.close();
       }else{
 	cout << "Invalid filename: " << filename << endl; 
@@ -57,10 +61,9 @@ int main(){
     else if(option == 2){
       cout << "input new record:" << endl;
       cin >> key;
+      getline(cin, data, ' '); //toss ws character
       getline(cin, data);
-      // make a new record
       temp = new Record(key, data);
-      // run insert DONT FORGET ABOUT PRIVACY LEAK
       A->insert(temp);
       delete temp; temp = NULL;
     }
@@ -108,7 +111,12 @@ int main(){
   }
 }
 
-void loadTable(ifstream& input){
-  
+/*void loadTable(ifstream& input){
+  int key;
+  string data
+  while(!input.eof()){
+    c
+  }
 }
 
+*/

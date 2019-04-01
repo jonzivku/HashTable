@@ -17,7 +17,7 @@ using std::cout;
 
 std::string Record::str(){
   std::stringstream ss;
-  ss << std::setw(9) << std::setfill('0') << id << data;
+  ss << std::setw(9) << std::setfill('0') << id << " " << data;
   return ss.str();
 }
   
