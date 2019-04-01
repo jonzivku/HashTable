@@ -1,4 +1,7 @@
 // Jon Zivku, jzivku, jonzivku@me.com, HashTable.h, A05 Hash Table
+#ifndef HASHTABLE__H
+#define HASHTABLE__H
+
 #include <vector>
 #include <string>
 #include <list>
@@ -29,10 +32,9 @@ class Record{
 class Record{
  public:
   Record(int p, std::string d){id = p; data = d;};
-  //Record(const Record &p2); // maybe not needed?
-  //std::string toString(){return
   int getId(){return id;}
   std::string getData(){return data;}
+  std::string str();
  private:
   int id;
   std::string data;
@@ -58,5 +60,4 @@ public:
   // other members as desired
 };
 
-
-
+#endif

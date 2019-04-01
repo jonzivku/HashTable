@@ -1,7 +1,9 @@
 // Jon Zivku, jzivku, jonzivku@me.com, main.cpp, A05 Hash Table
 
 /* 
-   Status: compiling/tested
+   Status: compiling/tested/unfinished
+
+   Went with std::list<Record*> for this one, to keep insert and delete at O(1). This also gave me a chance to work with iterators. pointers galore! one tricky thing to deal with was being aware that a library function would remove a pointer without calling delete. valgrind was wildly handy here. I might try an abstract class implementation for Record... that could be interesting.
 */
 #include <iostream>
 #include <iomanip>
@@ -17,6 +19,11 @@ using std::ostream;
 
 void loadTable(ifstream& input);
 
+std::string nineDig(int key){
+  std::stringstream ss;
+  ss << std::setw(9) << std::setfill('0') << key;
+  return ss.str();
+}
 
 int main(){
   int m = 178000;
@@ -60,30 +67,30 @@ int main(){
     else if(option == 3){
       cout << "delete record - key? ";
       cin >> key;
+      cout << endl;
       // search for the record
       temp = A->search(key);
       // if temp, display key, data
       if(temp){
-      	cout << "Delete: " << std::setw(9) << std::setfill('0')
-	     << temp->getId() << " " << temp->getData() << endl;
+      	cout << "Delete: " << temp->str() << endl;
 	A->remove(key);
       }else{
-	cout << "Delete not found: "
-	     << std::setw(9) << std::setfill('0') << key << endl;
+	cout << "Delete not found: " << nineDig(key) << endl;
+	//	     << std::setw(9) << std::setfill('0') << key << endl;
       }	
     }
     else if(option == 4){
       cout << "search for record - key? ";
       cin >> key;
       cout << endl;
-      temp = A->search(key); //segfault in this call when invalid
+      temp = A->search(key);
       // cout << "search completed" << endl; //testing
       if(temp){ 
-	cout << "Found: " << std::setw(9) << std::setfill('0')
-	     << temp->getId() << temp->getData() << endl;
+	cout << "Found: " << temp->str() << endl;
+	  /*std::setw(9) << std::setfill('0')
+			       << temp->getId() << temp->getData() << endl;*/
       }else{
-	cout << "Search not found: "
-	     << std::setw(9) << std::setfill('0') << key << endl;
+	cout << "Search not found: " << nineDig(key) << endl;
       }	
     }
     else if(option == 5){//clear
@@ -105,7 +112,3 @@ void loadTable(ifstream& input){
   
 }
 
-ostream &nineDig(ostream &output){
-  output << std::setw(9) << std::setfill('0');
-  return output;
-}
