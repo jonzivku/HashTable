@@ -32,9 +32,9 @@ class Record{
 class Record{
  public:
   Record(int p, std::string d){id = p; data = d;};
-  int getId(){return id;}
-  std::string getData(){return data;}
-  std::string str();
+  int getId(){return id;} // accessor for id/key
+  std::string getData(){return data;} // accessor for data
+  std::string str(); // returns a formatted string of "[id] [key]"
  private:
   int id;
   std::string data;
@@ -44,20 +44,34 @@ class HashTable{
 public:
   HashTable(int=100); // build a table
   ~HashTable();
-  void insert(Record *); // insert copy of record
-  void remove(int); // remove a record
-  Record *search(int); //segfault in here
-  // return pointer to a copy of found record, or 0
+  void insert(Record *);
+  // insert a record by key
+  // postcond: a copy of the record is placed in the table
+  void remove(int);
+  // remove a record by key
+  // pre-cond: a key for the record
+  // postcond: removes last inserted record whose key
+  //           matches the argument.
+  Record *search(int);
+  // search for a record by key
+  // pre-cond: a key for the record
+  // postcond: returns a pointer for the last inserted record whose key
+  //           matches the argument, otherwise returns NULL
+  std::vector<Record> content();
+  // 
+  // postcond: returns a list of a copy of all Records in the table
  private:
   // find return value: some type of index
-  Record *find(int); // helper search fn
-  int hash(Record *); // hash value for record
-  int hash(int); // hash value for key  
+  //  Record *find(int); // helper search fn
+  //int hash(Record *); // hash value for record
+  int hash(int);
+  // hash a key
+  // pre-cond: an integer
+  // poscond: hash index based on argument and tablesize is returned
   const int m; // size of table
-  
   std::list<Record*> *A;
   // array of m lists that hold records
-  // other members as desired
+
 };
 
 #endif

@@ -11,7 +11,7 @@
   }*/
 
 
-//using std::vector;
+using std::vector;
 using std::endl;
 using std::cout;
 
@@ -32,14 +32,9 @@ HashTable::~HashTable(){
       A[i].pop_back();
     }
   delete [] A;
-    //for(int j = A[i].size()-1; j >= 0; j--)
-    //delete A[i][j]; A[i][j] = NULL; 
 }
 
 
-//does it need a copy constructor?
- 
-//which order should insert and delete happen in?
 void HashTable::insert(Record *r){
   if (!r)
     return;
@@ -75,10 +70,21 @@ Record *HashTable::search(int key){
       if((*it)->getId() == key)
 	return *it;
     //return the first Record* whose Id matches key
-    // once the for loop is done, return NULL
-    // return A[hash(key)].front();
+    // once the for loop is done, return NULL for no match
   }
   return NULL;
+}
+
+vector<Record> HashTable::content(){
+  vector<Record> content;
+  // iterate across all of A
+  for(int i = 0; i < m; i++){
+    
+  }
+  // if A[i] is not empty,
+  // iterate through list at A[i] and copy records to content
+  
+  return content;
 }
 
 int HashTable::hash(int key){
