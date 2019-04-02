@@ -1,92 +1,77 @@
 // Jon Zivku, jzivku, jonzivku@me.com, main.cpp, A05 Hash Table
 
-/* 
+
+/*
+  Known issues:
+  1) input formatting is all wrong
+  2) HashTable::remove() deletes the record but doesnt delete the record* in the list, thats now pointing to nothing. maybe it should return a pointer to the record* (record**) instead so that we can call a remove function on it
    Status: compiling/tested/unfinished
 
-   Went with std::list<Record*> for this one, to keep insert and delete at O(1). This also gave me a chance to work with iterators. and reverse_iterators - pointers galore! one tricky thing to deal with was being aware that a library function would remove a pointer without calling delete. valgrind was wildly handy here. I might try an abstract class implementation for Record... that could be interesting.
+   Went with std::list<Record*> for this one, to keep insert and delete at O(1). This also gave me a chance to work with iterators. and reverse_iterators - pointers galore! one tricky thing to deal with was being aware that a library function would remove a pointer without calling delete. valgrind was wildly handy here. I might try an abstract class implementation for Record... that could be interesting. I was concerned about negative inputs, but the hash function is wildly robust for its simplicity, always giving a value from 0 to m-1. The toughest part of this assignment was probably the input processing for me - making the code robust enough to handle white space took some time and research.
 */
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
+#include <limits>
 #include "HashTable.h"
 
 using std::cin;
 using std::cout;
 using std::endl;
 
-std::string nineDig(int key){
-  std::stringstream ss;
-  ss << std::setw(9) << std::setfill('0') << key;
-  return ss.str();
-}
+void insert(std::string, HashTable*);
+// pre-cond: a string in the format "[int] [data]", and a pointer to HashTable
+// postcond: a record with key int and data data, is placed in the table
+
+std::string nineDig(int);
+// pre-cond: an integer of 9 digits or less
+// postcond: int returned as a string with leading '0's and a width of 9
 
 int main(){
-  //  int m = 178000; // fuck around with a way too small table
-  int m = 3;
+  int m = 178000;  
+  HashTable *A = new HashTable(m);
   int option;
   int key;
   std::string data;
-  std::string filename;
-  Record* temp;
-  HashTable *A = new HashTable(m);
+  std::string filename;  
+  Record* temp = NULL;
+  std::string buff;
   
   while(true){
-    
     cout << "(1)load (2)insert (3)delete (4)search (5)clear (6)save (7)quit -- "
 	 << "Your choice? ";
-    cin >> option;
+    std::getline(cin, buff);
+    std::istringstream iss(buff);    
+    iss >> option;
+
     if(option == 1){
       cout << "read hash table - filename? ";
-      cin >> filename;
-      
+      getline(cin, filename);
       std::ifstream input(filename.c_str(), std::ios::in);
       if(!input.fail()){
-	while(!input.eof()){//ill try eof next
-	  input >> key;
-	  getline(input, data, ' ');
-	  getline(input, data);
-	  //if(!input.eof()){ // feels like a hack
-	  temp = new Record(key, data);
-	  cout << "inserting: " << temp->str() << endl;
-	  A->insert(temp); // memory leak here?
-	  // can still search and delete the record
-	  // if i delete it, no memory leak recorded, no errors
-	  delete temp; temp = NULL;
-	    //}
-	}
-	input.close();/*
-	while(input){//ill try eof next
-	  input >> key;
-	  getline(input, data, ' ');
-	  getline(input, data);
-	  if(!input.eof()){ // feels like a hack
-	    temp = new Record(key, data);
-	    cout << "inserting: " << temp->str() << endl;
-	    A->insert(temp); // memory leak here?
-	    // can still search and delete the record
-	  // if i delete it, no memory leak recorded, no errors
-	    delete temp; temp = NULL;
-	  }
-	}
-	input.close();*/
-      }else{
+	input.ignore(0, '\n' );
+	while(std::getline(input, buff)){
+	  insert(buff, A);
+	  input.ignore(0, '\n' );
+	}//end of while(getline)
+	input.close();
+      }// end of if(!input.fail())
+      else
 	cout << "Invalid filename: " << filename << endl; 
-      }
     }
 
-    else if(option == 2){
+    else if(option == 2){//input
       cout << "input new record:" << endl;
-      cin >> key;
-      getline(cin, data, ' '); //toss ws character
-      getline(cin, data);
-      temp = new Record(key, data);
-      A->insert(temp);
-      delete temp; temp = NULL;
+      std::getline(cin, buff);
+      insert(buff, A);
     }
 
-    else if(option == 3){
+    else if(option == 3){//delete
       cout << "delete record - key? ";
-      cin >> key;
+      std::getline(cin, buff);
+      std::istringstream iss(buff);    
+      iss >> key;
       cout << endl;
       // search for the record
       temp = A->search(key);
@@ -94,18 +79,22 @@ int main(){
       if(temp){
       	cout << "Delete: " << temp->str() << endl;
 	A->remove(key);
+	delete temp; temp = NULL;
       }else{
 	cout << "Delete not found: " << nineDig(key) << endl;
       }	
     }
 
-    else if(option == 4){
+    else if(option == 4){//search
       cout << "search for record - key? ";
-      cin >> key;
+      std::getline(cin, buff);
+      std::istringstream iss(buff);
+      iss >> key;
       cout << endl;
       temp = A->search(key);
       if(temp){ 
 	cout << "Found: " << temp->str() << endl;
+	delete temp; temp = NULL;
       }else{
 	cout << "Search not found: " << nineDig(key) << endl;
       }	
@@ -113,12 +102,12 @@ int main(){
 
     else if(option == 5){//clear
       cout << "clearing hash table." << endl;
-      delete A; A = new HashTable(m);  
+      A->emptyTable();
     }
     
     else if(option == 6){ // write to file
       cout << "write hash table - filename? ";
-      cin >> filename;
+      getline(cin, filename);
       std::ofstream output(filename.c_str(), std::ios::out);
       if(!output.fail()){
 	std::vector<Record> content = A->content(); 
@@ -136,4 +125,25 @@ int main(){
       return 0;
     }
   }
+}
+
+void insert(std::string buff, HashTable* A){
+  std::istringstream iss(buff);
+  char toss = 0;
+  int key = 0;
+  std::string data = "";
+  iss >> key;
+  iss.get(toss);
+  std::getline(iss, data);
+  if(!data.empty()){
+    Record *temp = new Record(key, data);
+    A->insert(temp);
+    delete temp; temp = NULL;
+  }
+}
+
+std::string nineDig(int key){
+  std::ostringstream ss;
+  ss << std::setw(9) << std::setfill('0') << key;
+  return ss.str();
 }
