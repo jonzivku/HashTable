@@ -1,12 +1,8 @@
 // Jon Zivku, jzivku, jonzivku@me.com, main.cpp, A05 Hash Table
 
-
-/*
-  Known issues:
-  1) input formatting is all wrong
-  2) HashTable::remove() deletes the record but doesnt delete the record* in the list, thats now pointing to nothing. maybe it should return a pointer to the record* (record**) instead so that we can call a remove function on it
-   Status: compiling/tested/unfinished
-
+/* Status: compiling/finished/tested
+  Known issues: (3)delete and (4)search act weird when newline is input
+                insert(string,HashTable) doesnt like being sent empty input
    Went with std::list<Record*> for this one, to keep insert and delete at O(1). This also gave me a chance to work with iterators. and reverse_iterators - pointers galore! one tricky thing to deal with was being aware that a library function would remove a pointer without calling delete. valgrind was wildly handy here. I might try an abstract class implementation for Record... that could be interesting. I was concerned about negative inputs, but the hash function is wildly robust for its simplicity, always giving a value from 0 to m-1. The toughest part of this assignment was probably the input processing for me - making the code robust enough to handle white space took some time and research.
 */
 #include <iostream>
@@ -129,17 +125,15 @@ int main(){
 
 void insert(std::string buff, HashTable* A){
   std::istringstream iss(buff);
-  char toss = 0;
-  int key = 0;
+  char toss;
+  int key;
   std::string data = "";
   iss >> key;
   iss.get(toss);
   std::getline(iss, data);
-  if(!data.empty()){
-    Record *temp = new Record(key, data);
-    A->insert(temp);
-    delete temp; temp = NULL;
-  }
+  Record *temp = new Record(key, data);
+  A->insert(temp);
+  delete temp; temp = NULL;
 }
 
 std::string nineDig(int key){
