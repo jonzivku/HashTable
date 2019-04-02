@@ -3,7 +3,7 @@
 /* 
    Status: compiling/tested/unfinished
 
-   Went with std::list<Record*> for this one, to keep insert and delete at O(1). This also gave me a chance to work with iterators. pointers galore! one tricky thing to deal with was being aware that a library function would remove a pointer without calling delete. valgrind was wildly handy here. I might try an abstract class implementation for Record... that could be interesting.
+   Went with std::list<Record*> for this one, to keep insert and delete at O(1). This also gave me a chance to work with iterators. and reverse_iterators - pointers galore! one tricky thing to deal with was being aware that a library function would remove a pointer without calling delete. valgrind was wildly handy here. I might try an abstract class implementation for Record... that could be interesting.
 */
 #include <iostream>
 #include <iomanip>
@@ -13,11 +13,6 @@
 using std::cin;
 using std::cout;
 using std::endl;
-using std::string;
-using std::ifstream;
-using std::ostream;
-
-void loadTable(ifstream& input);
 
 std::string nineDig(int key){
   std::stringstream ss;
@@ -26,11 +21,12 @@ std::string nineDig(int key){
 }
 
 int main(){
-  int m = 178000;
+  //  int m = 178000; // fuck around with a way too small table
+  int m = 3;
   int option;
   int key;
-  string data;
-  string filename;
+  std::string data;
+  std::string filename;
   Record* temp;
   HashTable *A = new HashTable(m);
   
@@ -43,21 +39,41 @@ int main(){
       cout << "read hash table - filename? ";
       cin >> filename;
       
-      ifstream input(filename.c_str(), std::ios::in);
+      std::ifstream input(filename.c_str(), std::ios::in);
       if(!input.fail()){
-	while(input){
+	while(!input.eof()){//ill try eof next
 	  input >> key;
 	  getline(input, data, ' ');
 	  getline(input, data);
+	  //if(!input.eof()){ // feels like a hack
 	  temp = new Record(key, data);
-	  A->insert(temp);
+	  cout << "inserting: " << temp->str() << endl;
+	  A->insert(temp); // memory leak here?
+	  // can still search and delete the record
+	  // if i delete it, no memory leak recorded, no errors
 	  delete temp; temp = NULL;
+	    //}
+	}
+	input.close();/*
+	while(input){//ill try eof next
+	  input >> key;
+	  getline(input, data, ' ');
+	  getline(input, data);
+	  if(!input.eof()){ // feels like a hack
+	    temp = new Record(key, data);
+	    cout << "inserting: " << temp->str() << endl;
+	    A->insert(temp); // memory leak here?
+	    // can still search and delete the record
+	  // if i delete it, no memory leak recorded, no errors
+	    delete temp; temp = NULL;
 	  }
-	input.close();
+	}
+	input.close();*/
       }else{
 	cout << "Invalid filename: " << filename << endl; 
       }
     }
+
     else if(option == 2){
       cout << "input new record:" << endl;
       cin >> key;
@@ -67,6 +83,7 @@ int main(){
       A->insert(temp);
       delete temp; temp = NULL;
     }
+
     else if(option == 3){
       cout << "delete record - key? ";
       cin >> key;
@@ -79,44 +96,44 @@ int main(){
 	A->remove(key);
       }else{
 	cout << "Delete not found: " << nineDig(key) << endl;
-	//	     << std::setw(9) << std::setfill('0') << key << endl;
       }	
     }
+
     else if(option == 4){
       cout << "search for record - key? ";
       cin >> key;
       cout << endl;
       temp = A->search(key);
-      // cout << "search completed" << endl; //testing
       if(temp){ 
 	cout << "Found: " << temp->str() << endl;
-	  /*std::setw(9) << std::setfill('0')
-			       << temp->getId() << temp->getData() << endl;*/
       }else{
 	cout << "Search not found: " << nineDig(key) << endl;
       }	
     }
+
     else if(option == 5){//clear
       cout << "clearing hash table." << endl;
       delete A; A = new HashTable(m);  
     }
+    
     else if(option == 6){ // write to file
       cout << "write hash table - filename? ";
       cin >> filename;
-      // open ostream, check for fail, write. maybe a record.tostring would be appropriate?
-    }else if(option == 7){
+      std::ofstream output(filename.c_str(), std::ios::out);
+      if(!output.fail()){
+	std::vector<Record> content = A->content(); 
+	for(std::vector<Record>::iterator it = content.begin();
+	    it != content.end(); ++it)
+	  output  << it->str() << endl;	  
+	content.clear();
+	output.close();
+      }else
+	cout << "invalid filename: " << filename << endl;
+    }
+
+    else if(option == 7){
       delete A; A = NULL;
       return 0;
     }
   }
 }
-
-/*void loadTable(ifstream& input){
-  int key;
-  string data
-  while(!input.eof()){
-    c
-  }
-}
-
-*/

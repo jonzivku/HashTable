@@ -5,13 +5,7 @@
 #include <iomanip>
 #include "HashTable.h"
 
-/*Record::Record(const Record &p2){ unneccessary because dynamic classes
-  id = p2.id;
-  data = p2.data;
-  }*/
-
-
-using std::vector;
+//for testing
 using std::endl;
 using std::cout;
 
@@ -34,15 +28,14 @@ HashTable::~HashTable(){
   delete [] A;
 }
 
-
 void HashTable::insert(Record *r){
   if (!r)
     return;
   Record *s = new Record(r->getId(), r->getData());
-  // int index = hash(s->getId());
+  int index = hash(s->getId()); //testing
   A[hash(s->getId())].push_front(s);
-  // cout << "the table at spot " << index << " has " << A[index].size() << endl;
-  
+  cout << "the table at index " << index << " has " << A[index].size() << " elements" << endl;
+  //testing 
 }
 
 void HashTable::remove(int key){
@@ -75,15 +68,20 @@ Record *HashTable::search(int key){
   return NULL;
 }
 
-vector<Record> HashTable::content(){
-  vector<Record> content;
-  // iterate across all of A
+std::vector<Record> HashTable::content(){
+  std::vector<Record> content;
+  // iterate through A
   for(int i = 0; i < m; i++){
-    
+    if(!A[i].empty()){ // if A[i] is not empty
+      // iterate through list at A[i] and copy records to content
+      for(std::list<Record*>::reverse_iterator rit = A[i].rbegin();
+	  rit != A[i].rend(); ++rit){
+	content.push_back(**rit); //two-star programming!
+	//testing
+	std::cout << (*rit)->str() << std::endl;
+      }
+    }
   }
-  // if A[i] is not empty,
-  // iterate through list at A[i] and copy records to content
-  
   return content;
 }
 
